@@ -58,5 +58,5 @@ Envie o projeto para um repositório GitHub e crie no Render um serviço **Stati
 
 O Render publica os arquivos da pasta `public`; não há backend nem etapa de compilação.
 
-## como acessar
+## Como acessar
 link do site publicado: https://projeto-analise-dados-5tgu.onrender.com/ 
