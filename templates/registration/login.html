@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Entrar · SidCar Gestão{% endblock %}
+{% block content %}
+<section class="login-wrap">
+  <div class="eyebrow">ACESSO DA EQUIPE</div>
+  <h1>Entrar no sistema</h1>
+  <p>Use seu usuário e senha para acessar as rotinas da oficina.</p>
+  <form method="post" class="form-card">{% csrf_token %}
+    {% if form.errors %}<p class="error">Usuário ou senha inválidos.</p>{% endif %}
+    {{ form.as_p }}
+    <button class="button primary" type="submit">Entrar</button>
+  </form>
+</section>
+{% endblock %}

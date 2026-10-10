@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load oficina_tags %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">ORÇAMENTO · {{ ordem.codigo }}</div><h1>{{ ordem.cliente.nome }}</h1><p>{{ ordem.veiculo.placa }} · {{ ordem.veiculo.marca }} {{ ordem.veiculo.modelo }}</p></div><a class="button secondary" href="{% url 'ordem_detalhe' ordem.pk %}">Voltar à OS</a></div>
+{% if pode_editar %}<form method="post" class="card form-card">{% csrf_token %}
+  <div class="two-columns"><div>{{ form.desconto_percentual.label_tag }}{{ form.desconto_percentual }}{{ form.desconto_percentual.errors }}</div><div>{{ form.validade.label_tag }}{{ form.validade }}{{ form.validade.errors }}</div></div>
+  <h2>Itens do orçamento</h2>
+  {{ formset.management_form }}
+  {% if formset.non_form_errors %}<div class="error">{{ formset.non_form_errors }}</div>{% endif %}
+  {% for item in formset %}<div class="item-grid">
+    {% for hidden in item.hidden_fields %}{{ hidden }}{% endfor %}
+    <div>{{ item.tipo.label_tag }}{{ item.tipo }}{{ item.tipo.errors }}</div>
+    <div>{{ item.descricao.label_tag }}{{ item.descricao }}{{ item.descricao.errors }}</div>
+    <div>{{ item.quantidade.label_tag }}{{ item.quantidade }}{{ item.quantidade.errors }}</div>
+    <div>{{ item.custo_unitario.label_tag }}{{ item.custo_unitario }}{{ item.custo_unitario.errors }}</div>
+    <div>{{ item.preco_unitario.label_tag }}{{ item.preco_unitario }}{{ item.preco_unitario.errors }}</div>
+    {% if item.DELETE %}<label class="check-field">{{ item.DELETE }} Remover</label>{% endif %}
+  </div>{% endfor %}
+  <button class="button primary" type="submit">Salvar orçamento</button>
+  </form>{% else %}<section class="card"><h2>Itens — {{ orcamento.get_status_display }}</h2><div class="table-scroll"><table><thead><tr><th>Tipo</th><th>Descrição</th><th>Quantidade</th><th>Custo unitário</th><th>Preço unitário</th></tr></thead><tbody>{% for item in orcamento.itens.all %}<tr><td>{{ item.get_tipo_display }}</td><td>{{ item.descricao }}</td><td>{{ item.quantidade }}</td><td>{{ item.custo_unitario|currency_brl }}</td><td>{{ item.preco_unitario|currency_brl }}</td></tr>{% empty %}<tr><td colspan="5">Nenhum item informado.</td></tr>{% endfor %}</tbody></table></div></section>{% endif %}
+{% if totais %}<section class="card totals-card"><div><span>Subtotal</span><strong>{{ totais.subtotal|currency_brl }}</strong></div><div><span>Custo estimado</span><strong>{{ totais.custo_total|currency_brl }}</strong></div><div><span>Desconto</span><strong>{{ totais.valor_desconto|currency_brl }}</strong></div><div class="total-final"><span>Total do orçamento</span><strong>{{ totais.total_final|currency_brl }}</strong></div><a class="button secondary" href="{% url 'orcamento_pdf' orcamento.pk %}">Gerar PDF</a></section>{% endif %}
+<section class="card status-actions"><h2>Etapa do orçamento</h2><p>Status atual: <strong>{{ orcamento.get_status_display }}</strong></p>
+  {% if orcamento.status == 'rascunho' or orcamento.status == 'recusado' %}<form method="post">{% csrf_token %}<input type="hidden" name="mudar_status_orcamento" value="1"><input type="hidden" name="status_orcamento" value="enviado"><button class="button secondary">Marcar como enviado</button></form>
+  {% elif orcamento.status == 'enviado' %}<div class="button-row"><form method="post">{% csrf_token %}<input type="hidden" name="mudar_status_orcamento" value="1"><input type="hidden" name="status_orcamento" value="aprovado"><button class="button primary">Registrar aprovação</button></form><form method="post">{% csrf_token %}<input type="hidden" name="mudar_status_orcamento" value="1"><input type="hidden" name="status_orcamento" value="recusado"><button class="button secondary">Registrar recusa</button></form></div>{% endif %}
+</section>
+{% endblock %}

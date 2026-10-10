@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load oficina_tags %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">SUPRIMENTOS</div><h1>Estoque</h1><p>Registre entradas, saídas e ajustes. Saídas sem saldo suficiente são bloqueadas.</p></div></div>
+<div class="two-columns">
+  <section class="card"><h2>Novo item</h2><form method="post" class="form-card">{% csrf_token %}<button type="submit" name="salvar_produto" class="button primary">Salvar item</button>{{ produto_form.as_p }}</form></section>
+  <section class="card"><h2>Movimentar estoque</h2><form method="post" class="form-card">{% csrf_token %}<button type="submit" name="registrar_movimento" class="button primary">Registrar movimento</button>{{ movimento_form.as_p }}</form></section>
+</div>
+<section class="card"><h2>Saldo atual</h2><div class="table-scroll"><table><thead><tr><th>Código</th><th>Item</th><th>Tipo</th><th>Saldo</th><th>Mínimo</th><th>Custo unitário</th></tr></thead><tbody>{% for produto in produtos %}<tr><td>{{ produto.codigo }}</td><td>{{ produto.nome }}</td><td>{{ produto.get_tipo_display }}</td><td>{{ produto.quantidade_atual }} {{ produto.unidade }}</td><td>{{ produto.estoque_minimo }} {{ produto.unidade }}</td><td>{{ produto.custo_unitario|currency_brl }}</td></tr>{% empty %}<tr><td colspan="6">Nenhum item no estoque.</td></tr>{% endfor %}</tbody></table></div></section>
+<section class="card"><h2>Movimentações recentes</h2><div class="table-scroll"><table><thead><tr><th>Data</th><th>Item</th><th>Movimento</th><th>Quantidade</th><th>Motivo</th><th>Usuário</th></tr></thead><tbody>{% for movimento in movimentos %}<tr><td>{{ movimento.criado_em|date:"d/m/Y H:i" }}</td><td>{{ movimento.produto.nome }}</td><td>{{ movimento.get_tipo_display }}</td><td>{{ movimento.quantidade }} {{ movimento.produto.unidade }}</td><td>{{ movimento.motivo }}</td><td>{{ movimento.registrado_por }}</td></tr>{% empty %}<tr><td colspan="6">Nenhuma movimentação registrada.</td></tr>{% endfor %}</tbody></table></div></section>
+{% endblock %}

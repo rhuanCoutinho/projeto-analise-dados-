@@ -1,0 +1,32 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f6f9">
+  <title>{% block title %}SidCar Gestão{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'oficina/app.css' %}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{% url 'painel' %}"><span class="brand-mark">S</span><span>SidCar <small>GESTÃO DA OFICINA</small></span></a>
+    {% if user.is_authenticated %}
+      <nav aria-label="Navegação principal">
+        <a href="{% url 'painel' %}">Painel</a>
+        {% if papel == 'dono' or papel == 'orcamentista' %}<a href="{% url 'clientes' %}">Clientes</a><a href="{% url 'veiculos' %}">Veículos</a>{% endif %}
+        {% if papel != 'financeiro' %}<a href="{% url 'ordens' %}">Ordens de serviço</a>{% endif %}
+        {% if papel == 'dono' or papel == 'financeiro' %}<a href="{% url 'estoque' %}">Estoque</a><a href="{% url 'financeiro' %}">Financeiro</a>{% endif %}
+      </nav>
+      <div class="account"><span>{{ user.get_full_name|default:user.username }} · {{ papel_label }}</span>
+        <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="link-button" type="submit">Sair</button></form>
+      </div>
+    {% endif %}
+  </header>
+  <main class="page">
+    {% if messages %}<div class="messages" aria-live="polite">{% for message in messages %}<p class="message {{ message.tags }}">{{ message }}</p>{% endfor %}</div>{% endif %}
+    {% block content %}{% endblock %}
+    <footer class="footer">SidCar · Sistema de gestão local e seguro para a operação da oficina.</footer>
+  </main>
+</body>
+</html>

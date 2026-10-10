@@ -1,0 +1,11 @@
+# Perfil temporário criado durante a tentativa de verificação no navegador.
+public/.browser-profile/
+
+# Segredos, ambiente local e arquivos gerados pelo Django.
+.env
+.venv/
+__pycache__/
+*.py[cod]
+db.sqlite3
+staticfiles/
+media/

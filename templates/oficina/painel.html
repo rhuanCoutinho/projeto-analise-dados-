@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load oficina_tags %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">RESUMO OPERACIONAL</div><h1>Bom trabalho, {{ user.first_name|default:user.username }}.</h1><p>Acompanhe o que precisa de atenção hoje.</p></div><a class="button primary" href="{% url 'ordem_nova' %}">Abrir ordem de serviço</a></div>
+<section class="metric-grid" aria-label="Indicadores principais">
+  <article class="metric"><span>Ordens em andamento</span><strong>{{ ordens_abertas }}</strong><small>Não entregues ou canceladas</small></article>
+  <article class="metric"><span>Em vistoria/orçamento</span><strong>{{ aguardando_orcamento }}</strong><small>Precisam de orçamento ou aprovação</small></article>
+  <article class="metric"><span>Faturado neste mês</span><strong>{{ faturamento_mes|currency_brl }}</strong><small>Faturamentos emitidos</small></article>
+  {% if papel == 'dono' or papel == 'financeiro' %}<article class="metric"><span>A receber</span><strong>{{ a_receber|currency_brl }}</strong><small>Parcelas em aberto</small></article><article class="metric"><span>A pagar</span><strong>{{ a_pagar|currency_brl }}</strong><small>Contas em aberto</small></article><article class="metric metric-alert"><span>Itens com estoque baixo</span><strong>{{ estoque_baixo }}</strong><small>No limite mínimo ou abaixo</small></article>{% endif %}
+</section>
+<div class="two-columns">
+  <section class="card"><div class="section-title"><h2>Ordens recentes</h2><a href="{% url 'ordens' %}">Ver todas</a></div>
+    {% if recentes %}<div class="table-scroll"><table><thead><tr><th>OS</th><th>Cliente e veículo</th><th>Etapa</th><th></th></tr></thead><tbody>{% for ordem in recentes %}<tr><td><strong>{{ ordem.codigo }}</strong></td><td>{{ ordem.cliente.nome }}<small class="subrow">{{ ordem.veiculo.placa }} · {{ ordem.veiculo.marca }} {{ ordem.veiculo.modelo }}</small></td><td><span class="status">{{ ordem.get_status_display }}</span></td><td><a href="{% url 'ordem_detalhe' ordem.pk %}">Abrir</a></td></tr>{% endfor %}</tbody></table></div>{% else %}<p class="empty">Nenhuma ordem cadastrada.</p>{% endif %}
+  </section>
+  <section class="card"><div class="section-title"><h2>Ordens por etapa</h2></div>
+    {% for grupo in por_status %}<div class="bar-row"><span>{{ grupo.rotulo }}</span><strong>{{ grupo.total }}</strong></div>{% empty %}<p class="empty">Sem ordens em andamento.</p>{% endfor %}
+  </section>
+</div>
+{% endblock %}

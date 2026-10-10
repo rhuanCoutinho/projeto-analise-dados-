@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7fa">
+  <meta name="description" content="Painel SidCar para acompanhar ordens de serviço, faturamento e serviços de funilaria e pintura.">
+  <title>SidCar | Funilaria e Pintura</title>
+  <script>
+    try {
+      if (localStorage.getItem("tema-dashboard") === "dark") {
+        document.documentElement.dataset.theme = "dark";
+      }
+    } catch (erro) {
+      // O tema claro continua disponível quando o navegador bloqueia armazenamento local.
+    }
+  </script>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="#inicio" aria-label="Painel SidCar — início">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 18V6m0 12h16M7 14l4-4 3 2 5-6"/></svg></span>
+        <span>SidCar</span>
+      </a>
+      <span class="course-label"><span class="course-dot"></span> Funilaria e pintura</span>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Alternar tema claro ou escuro" aria-pressed="false">
+        <svg class="theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 15.4A8.5 8.5 0 0 1 8.6 3.8 8.5 8.5 0 1 0 20.2 15.4Z"/></svg>
+        <svg class="theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+        <span id="theme-toggle-label">Tema escuro</span>
+      </button>
+    </header>
+
+    <section class="hero" id="inicio" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">SIDCAR <span></span> FUNILARIA E PINTURA</p>
+        <h1 id="page-title">Serviços em dia.<br class="desktop-break"> Resultados à vista.</h1>
+        <p class="hero-copy">Acompanhe ordens de serviço, faturamento e os reparos mais realizados.</p>
+      </div>
+    </section>
+
+    <section class="panel filters-panel" aria-labelledby="filters-title">
+      <div class="section-heading filter-heading">
+        <div class="heading-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10m-7 6h4"/></svg></div>
+        <div><h2 id="filters-title">Visão da oficina</h2><p>Combine período, categoria, marca e modelo.</p></div>
+        <span class="demo-badge"><span></span> Dados demonstrativos</span>
+      </div>
+      <div class="filter-grid">
+        <label class="field"><span>Data inicial</span><input id="date-from" type="date" aria-label="Filtrar a partir desta data"></label>
+        <label class="field"><span>Data final</span><input id="date-to" type="date" aria-label="Filtrar até esta data"></label>
+        <label class="field"><span>Categoria</span><select id="category-filter"><option value="">Todas as categorias</option></select></label>
+        <label class="field"><span>Marca</span><select id="brand-filter"><option value="">Todas as marcas</option></select></label>
+        <label class="field"><span>Modelo</span><select id="model-filter"><option value="">Todos os modelos</option></select></label>
+        <div class="filter-actions">
+          <button type="button" class="button button-quiet" id="clear-filters"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Limpar filtros</button>
+          <label class="button button-primary import-button" for="csv-file"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4m-4 4 4-4 4 4M5 14v5h14v-5"/></svg>Importar CSV<input id="csv-file" type="file" accept=".csv,text/csv" aria-label="Selecionar arquivo CSV"></label>
+        </div>
+      </div>
+      <div class="data-note" id="data-note" role="status"><span class="note-icon">i</span><span>Dados demonstrativos da SidCar. Serviços e valores são fictícios; a leitura de arquivos acontece localmente no navegador.</span></div>
+      <div class="quality-message" id="quality-message" role="status" hidden></div>
+    </section>
+
+    <details class="panel entry-panel">
+      <summary>Registrar nova entrada na oficina</summary>
+      <p class="entry-help">Informe o veículo e o serviço. A entrada fica disponível nesta sessão; exporte o CSV para guardar uma cópia.</p>
+      <form id="entry-form" class="entry-grid">
+        <label class="field"><span>Marca</span><input id="entry-brand" name="marca" type="text" placeholder="Ex.: Toyota" required></label>
+        <label class="field"><span>Modelo</span><input id="entry-model" name="modelo" type="text" placeholder="Ex.: Corolla" required></label>
+        <label class="field"><span>Data de entrada</span><input id="entry-date" name="data" type="date" required></label>
+        <label class="field"><span>Serviço</span><input id="entry-service" name="servico" type="text" placeholder="Ex.: Pintura de porta" required></label>
+        <label class="field"><span>Categoria</span><select id="entry-category" name="categoria" required><option value="">Selecione</option><option>Funilaria</option><option>Pintura</option><option>Estética automotiva</option></select></label>
+        <label class="field"><span>Quantidade</span><input id="entry-quantity" name="quantidade" type="number" min="1" step="1" value="1" required></label>
+        <label class="field"><span>Preço unitário (R$)</span><input id="entry-price" name="preco_unitario" type="text" inputmode="decimal" placeholder="Ex.: 850,00" required></label>
+        <button class="button button-primary entry-submit" type="submit">Adicionar entrada</button>
+      </form>
+      <p id="entry-message" class="entry-message" role="status" hidden></p>
+    </details>
+
+    <section class="metrics-grid" aria-label="Indicadores da oficina">
+      <article class="metric-card metric-primary"><div class="metric-top"><span>Faturamento total</span><span class="metric-icon" aria-hidden="true">R$</span></div><strong id="revenue-total">R$ 0,00</strong><p>Valor dos serviços no recorte</p><div class="metric-accent"></div></article>
+      <article class="metric-card"><div class="metric-top"><span>Ordens de serviço</span><span class="metric-icon icon-blue" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 7h14l-1 13H6L5 7Zm3 0a4 4 0 0 1 8 0"/></svg></span></div><strong id="sales-count">0</strong><p>OS únicas no período</p></article>
+      <article class="metric-card"><div class="metric-top"><span>Serviços realizados</span><span class="metric-icon icon-green" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Zm-8 4.5 8 4.5 8-4.5M12 12v9"/></svg></span></div><strong id="units-count">0</strong><p>Soma das quantidades atendidas</p></article>
+      <article class="metric-card"><div class="metric-top"><span>Ticket médio por OS</span><span class="metric-icon icon-teal" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v18m5-14H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg></span></div><strong id="average-ticket">R$ 0,00</strong><p>Faturamento ÷ OS únicas</p></article>
+    </section>
+
+    <section class="charts-grid" aria-label="Gráficos de faturamento">
+      <article class="panel chart-panel"><div class="chart-title"><div><p class="eyebrow">TENDÊNCIA</p><h2>Faturamento mensal</h2></div><span class="chart-unit">R$ por mês</span></div><div class="chart-wrap"><canvas id="monthly-chart" role="img" aria-label="Gráfico de linha com faturamento mensal"></canvas></div></article>
+      <article class="panel chart-panel"><div class="chart-title"><div><p class="eyebrow">COMPARAÇÃO</p><h2>Faturamento por categoria de serviço</h2></div><span class="chart-unit">R$</span></div><div class="chart-wrap"><canvas id="category-chart" role="img" aria-label="Gráfico de barras com faturamento por categoria de serviço"></canvas></div></article>
+    </section>
+
+    <section class="panel table-panel" aria-labelledby="table-title">
+      <div class="table-header"><div class="section-heading"><div class="heading-icon table-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM4 10h16M9 5v14"/></svg></div><div><h2 id="table-title">Ordens de serviço</h2><p id="record-count" aria-live="polite">0 registros após os filtros</p></div></div>
+        <div class="table-tools"><label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg><span class="sr-only">Pesquisar na tabela</span><input id="table-search" type="search" placeholder="Pesquisar OS, marca ou modelo" autocomplete="off"></label><button class="button button-export" id="export-csv" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m-4-4 4 4 4-4M5 15v5h14v-5"/></svg>Exportar CSV</button></div>
+      </div>
+      <div class="table-scroll"><table><thead><tr>
+        <th scope="col"><button data-sort="id_os" type="button">OS <span aria-hidden="true">↕</span></button></th>
+        <th scope="col"><button data-sort="data" type="button">Data <span aria-hidden="true">↕</span></button></th>
+        <th scope="col"><button data-sort="servico" type="button">Serviço <span aria-hidden="true">↕</span></button></th>
+        <th scope="col"><button data-sort="categoria" type="button">Categoria <span aria-hidden="true">↕</span></button></th>
+        <th scope="col"><button data-sort="marca" type="button">Marca <span aria-hidden="true">↕</span></button></th>
+        <th scope="col"><button data-sort="modelo" type="button">Modelo <span aria-hidden="true">↕</span></button></th>
+        <th scope="col" class="numeric"><button data-sort="quantidade" type="button">Unidades <span aria-hidden="true">↕</span></button></th>
+        <th scope="col" class="numeric"><button data-sort="preco_unitario" type="button">Preço unitário <span aria-hidden="true">↕</span></button></th>
+        <th scope="col" class="numeric"><button data-sort="faturamento" type="button">Faturamento <span aria-hidden="true">↕</span></button></th>
+      </tr></thead><tbody id="sales-table-body"></tbody></table>
+        <div id="empty-state" class="empty-state" hidden><span class="empty-icon" aria-hidden="true">⌕</span><strong>Nenhuma OS encontrada</strong><span>Ajuste os filtros ou a pesquisa para ver os resultados.</span></div>
+      </div>
+      <div class="table-footer"><span id="table-summary">Exibindo 0 registros</span><span>Valores calculados a partir dos dados carregados</span></div>
+    </section>
+
+    <footer class="page-footer"><span>SidCar · Funilaria e pintura</span><span>Os dados importados permanecem no seu navegador.</span></footer>
+  </main>
+</body>
+</html>

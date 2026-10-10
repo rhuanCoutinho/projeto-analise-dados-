@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">CADASTROS</div><h1>Veículos</h1><p>Placa, modelo e seguradora vinculados ao cliente.</p></div><a class="button primary" href="{% url 'veiculo_novo' %}">Novo veículo</a></div>
+<section class="card table-scroll"><table><thead><tr><th>Placa</th><th>Veículo</th><th>Cliente</th><th>Seguradora</th></tr></thead><tbody>{% for veiculo in veiculos %}<tr><td><strong>{{ veiculo.placa }}</strong></td><td>{{ veiculo.marca }} {{ veiculo.modelo }}{% if veiculo.ano %} · {{ veiculo.ano }}{% endif %}</td><td>{{ veiculo.cliente.nome }}</td><td>{{ veiculo.seguradora|default:"Particular/não informada" }}</td></tr>{% empty %}<tr><td colspan="4">Nenhum veículo cadastrado.</td></tr>{% endfor %}</tbody></table></section>
+{% endblock %}

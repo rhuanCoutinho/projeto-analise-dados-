@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">PRODUÇÃO</div><h1>Ordens de serviço</h1><p>Acompanhe a etapa atual e a equipe responsável.</p></div>{% if papel == 'dono' or papel == 'orcamentista' %}<a class="button primary" href="{% url 'ordem_nova' %}">Abrir OS</a>{% endif %}</div>
+<section class="card table-scroll"><table><thead><tr><th>OS</th><th>Cliente</th><th>Veículo</th><th>Abertura</th><th>Status</th><th></th></tr></thead><tbody>{% for ordem in ordens %}<tr><td><strong>{{ ordem.codigo }}</strong></td><td>{{ ordem.cliente.nome }}</td><td>{{ ordem.veiculo.placa }} · {{ ordem.veiculo.marca }} {{ ordem.veiculo.modelo }}</td><td>{{ ordem.data_abertura|date:"d/m/Y H:i" }}</td><td><span class="status">{{ ordem.get_status_display }}</span></td><td><a href="{% url 'ordem_detalhe' ordem.pk %}">Detalhes</a></td></tr>{% empty %}<tr><td colspan="6">Nenhuma ordem de serviço encontrada.</td></tr>{% endfor %}</tbody></table></section>
+{% endblock %}

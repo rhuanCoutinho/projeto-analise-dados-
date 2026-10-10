@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">CADASTROS</div><h1>Clientes</h1><p>Guarde somente as informações de contato necessárias para o atendimento.</p></div><a class="button primary" href="{% url 'cliente_novo' %}">Novo cliente</a></div>
+<form class="search-form" method="get"><label for="q">Pesquisar cliente</label><input id="q" name="q" value="{{ termo }}" placeholder="Nome"><button class="button secondary">Pesquisar</button></form>
+<section class="card table-scroll"><table><thead><tr><th>Nome</th><th>Telefone</th><th>E-mail</th><th>Veículos</th><th>Consentimento</th></tr></thead><tbody>{% for cliente in clientes %}<tr><td>{{ cliente.nome }}</td><td>{{ cliente.telefone }}</td><td>{{ cliente.email|default:"—" }}</td><td>{{ cliente.veiculos.count }}</td><td>{% if cliente.consentimento_dados %}Registrado{% else %}Não registrado{% endif %}</td></tr>{% empty %}<tr><td colspan="5">Nenhum cliente encontrado.</td></tr>{% endfor %}</tbody></table></section>
+{% endblock %}

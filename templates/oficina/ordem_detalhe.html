@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">ORDEM DE SERVIÇO</div><h1>{{ ordem.codigo }}</h1><p>{{ ordem.cliente.nome }} · {{ ordem.veiculo.placa }} · {{ ordem.veiculo.marca }} {{ ordem.veiculo.modelo }}</p></div><span class="status status-large">{{ ordem.get_status_display }}</span></div>
+<div class="two-columns">
+  <section class="card"><h2>Dados do atendimento</h2><dl class="details-list"><dt>Cliente</dt><dd>{{ ordem.cliente.nome }} · {{ ordem.cliente.telefone }}</dd><dt>Veículo</dt><dd>{{ ordem.veiculo.placa }} — {{ ordem.veiculo.marca }} {{ ordem.veiculo.modelo }}{% if ordem.veiculo.seguradora %} · {{ ordem.veiculo.seguradora.nome }}{% endif %}</dd><dt>Abertura</dt><dd>{{ ordem.data_abertura|date:"d/m/Y H:i" }}</dd><dt>Descrição</dt><dd>{{ ordem.descricao|default:"Sem observações."|linebreaksbr }}</dd>{% if ordem.data_entrega %}<dt>Entrega</dt><dd>{{ ordem.data_entrega|date:"d/m/Y H:i" }}</dd>{% endif %}</dl>
+    {% if pode_orcar %}<a class="button primary" href="{% url 'orcamento_editar' ordem.pk %}">Criar/editar orçamento</a>{% endif %}
+  </section>
+  <section class="card"><h2>Atualizar etapa</h2>
+    {% if transicoes %}<form method="post" class="form-card">{% csrf_token %}<input type="hidden" name="mudar_status" value="1"><p><label for="id_status">Próxima etapa</label>{{ status_form.status }}</p><p>{{ status_form.observacao.label_tag }}{{ status_form.observacao }}</p><button class="button primary">Registrar mudança</button></form>{% else %}<p class="empty">Esta ordem não tem mais transições disponíveis.</p>{% endif %}
+  </section>
+</div>
+<div class="two-columns detail-columns">
+  <section class="card"><h2>Histórico de etapas</h2><ol class="timeline">{% for item in historico %}<li><strong>{{ item.get_status_novo_display }}</strong><span>{{ item.criado_em|date:"d/m/Y H:i" }} · {{ item.alterado_por.get_full_name|default:item.alterado_por.username }}</span>{% if item.observacao %}<p>{{ item.observacao }}</p>{% endif %}</li>{% empty %}<li>Histórico ainda não disponível.</li>{% endfor %}</ol></section>
+  <section class="card"><h2>Fotos da vistoria</h2>{% if pode_foto %}<form method="post" enctype="multipart/form-data" class="form-card">{% csrf_token %}<input type="hidden" name="adicionar_foto" value="1">{{ foto_form.as_p }}<button class="button secondary">Adicionar foto</button></form>{% endif %}<div class="photo-grid">{% for foto in fotos %}<figure><a href="{{ foto.arquivo.url }}" target="_blank" rel="noopener"><img src="{{ foto.arquivo.url }}" alt="{{ foto.get_tipo_display }} — {{ foto.descricao }}"></a><figcaption>{{ foto.get_tipo_display }} · {{ foto.descricao }}<small>{{ foto.criado_em|date:"d/m/Y H:i" }}</small></figcaption></figure>{% empty %}<p class="empty">Nenhuma foto anexada.</p>{% endfor %}</div></section>
+</div>
+{% endblock %}
